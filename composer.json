@@ -33,7 +33,7 @@
         }
     },
     "php-ext": {
-        "extension-name": "png",
+        "extension-name": "imgdec",
         "priority": 30,
         "support-zts": true,
         "support-nts": true,
