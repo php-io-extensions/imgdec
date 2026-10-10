@@ -25,6 +25,7 @@ ext-imgdec                          bytes → RGBA8                         ← 
 - libpng 1.6+, libjpeg (libjpeg-turbo) and libtiff 4.5+, with their headers, found through `pkg-config`:
   - macOS: `brew install pkg-config libpng jpeg-turbo libtiff`
   - Debian, Raspberry Pi OS, Ubuntu: `sudo apt install pkg-config libpng-dev libjpeg-dev libtiff-dev`
+- `venusian build` reads the system packages from `extra.venusian.system` in composer.json: apt packages to build with and the run-time ones a `.deb` depends on or recommends, and the Homebrew ones.
 
 ## Installation
 

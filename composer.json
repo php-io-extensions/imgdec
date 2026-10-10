@@ -30,6 +30,24 @@
     "extra": {
         "branch-alias": {
             "dev-main": "0.10.x-dev"
+        },
+        "venusian": {
+            "system": {
+                "apt": {
+                    "build": [
+                        "libpng-dev",
+                        "libjpeg-dev",
+                        "libtiff-dev"
+                    ]
+                },
+                "brew": {
+                    "build": [
+                        "libpng",
+                        "jpeg-turbo",
+                        "libtiff"
+                    ]
+                }
+            }
         }
     },
     "php-ext": {
