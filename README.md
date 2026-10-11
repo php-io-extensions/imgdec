@@ -1,5 +1,6 @@
 # ext-imgdec
 
+[![CI](https://img.shields.io/github/actions/workflow/status/php-io-extensions/imgdec/ci.yml?style=flat-square&label=CI)](https://github.com/php-io-extensions/imgdec/actions/workflows/ci.yml)
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/php-io-extensions/imgdec.svg)](https://packagist.org/packages/php-io-extensions/imgdec)
 [![License](https://img.shields.io/packagist/l/php-io-extensions/imgdec.svg)](LICENSE)
 
