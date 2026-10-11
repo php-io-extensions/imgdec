@@ -23,7 +23,7 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php }}
-          tools: none
+          tools: composer
         env:
           phpts: ${{ matrix.ts == 'zts' && 'ts' || 'nts' }}
 
@@ -48,3 +48,8 @@ jobs:
         run: |
           php -n -d extension="$PWD/modules/imgdec.so" -r 'exit(extension_loaded("imgdec") ? 0 : 1);'
           php -n -d extension="$PWD/modules/imgdec.so" --ri imgdec
+
+      - name: Test
+        run: |
+          composer install --no-interaction --no-progress
+          php -d extension="$PWD/modules/imgdec.so" -d memory_limit=128M vendor/bin/pest --ci
