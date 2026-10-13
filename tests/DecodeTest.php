@@ -7,7 +7,7 @@ it('declares its limits and its exception', function () {
         ->and(IMGDEC_MAX_PIXELS)->toBe(1 << 26)
         ->and([IMGDEC_CORRUPT, IMGDEC_UNSUPPORTED, IMGDEC_TOO_LARGE])->toBe([1, 2, 3])
         ->and(is_subclass_of(ImgdecException::class, Exception::class))->toBeTrue()
-        ->and(phpversion('imgdec'))->toBe('0.10.0');
+        ->and(phpversion('imgdec'))->toBe('0.10.5');
 });
 
 it('decodes PNG to straight RGBA8, alpha exactly as the file holds it', function () {

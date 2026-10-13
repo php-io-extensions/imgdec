@@ -4,7 +4,7 @@
 extern zend_module_entry imgdec_module_entry;
 #define phpext_imgdec_ptr &imgdec_module_entry
 
-#define PHP_IMGDEC_VERSION "0.10.0"
+#define PHP_IMGDEC_VERSION "0.10.5"
 
 #if defined(ZTS) && defined(COMPILE_DL_IMGDEC)
 ZEND_TSRMLS_CACHE_EXTERN()
