@@ -2,7 +2,7 @@
 
 <h1>ext-imgdec</h1>
 
-<h3>PNG, JPEG and TIFF into straight RGBA8 for PHP 8.4+, through libpng, libjpeg and libtiff</h3>
+<h3>A small PHP8.4+ library for decoding PNG, JPEG and TIFF images into RGBA8 format.</h3>
 
 [![CI](https://img.shields.io/github/actions/workflow/status/php-io-extensions/imgdec/ci.yml?style=flat-square&label=CI)](https://github.com/php-io-extensions/imgdec/actions/workflows/ci.yml)
 [![Packagist](https://img.shields.io/packagist/v/php-io-extensions/imgdec?style=flat-square)](https://packagist.org/packages/php-io-extensions/imgdec)
@@ -14,13 +14,12 @@
 
 </div>
 
-Anything that draws an image itself, a framebuffer, a GPU texture, a display panel, a compositor, needs the image as plain pixels: every pixel's red, green, blue and alpha in a known order. Files don't arrive that way. A map tile comes as JPEG, an icon as PNG with a palette, a scan as a TIFF in strips or tiles, and each format has its own compression, colour models and alpha rules to undo first.
+Anything that draws an image itself, be it a framebuffer, a GPU texture, a display panel, or a compositor, needs the image as plain pixels: every pixel's red, green, blue and alpha channel in a known order. Files don't arrive that way. A map tile comes as JPEG, an icon as PNG with a palette, a scan as a TIFF in strips or tiles, and each format has its own compression, color models and alpha rules to undo first.
 
-PHP's built-in answer is gd, and gd was made to edit images, not to hand their pixels over. It keeps alpha in 7 bits, it can't read TIFF, and it gives its pixels out through `imagecolorat()`, one call per pixel. Getting a 512 × 512 JPEG tile into an RGBA8 string that way takes about 22 ms on an Apple M1 Pro. gd decodes the tile in about 1 ms; the other 21 are the 262,144 `imagecolorat()` calls and the packing around them.
+<b>The only problem?</b> PHP's built-in answer is gd, but gd was made to edit images, not to hand their pixels over. It keeps alpha in 7 bits, it can't read TIFF, and it gives its pixels out through `imagecolorat()`, one call per pixel. Getting a 512 × 512 JPEG tile into an RGBA8 string that way takes about 22 ms on an average 4-5 year old MBP. gd decodes the tile in about 1 ms; the other 21 are the 262,144 `imagecolorat()` calls plus the packing logic around them.
 
 <b>ext-imgdec</b> decodes in C. Three functions take a file's bytes and answer `['width', 'height', 'rgba8']`: every pixel as one string, straight alpha, rows top to bottom. The same tile takes about 1 ms. PNG goes through libpng, JPEG through libjpeg, TIFF through libtiff, each with its formats' quirks settled by fixed, written-down rules: palettes expanded, transparency made alpha, 16-bit samples cut to 8, CMYK converted, associated alpha divided out.
 
-<b>The only problem?</b> The libraries are C, and the route to them was FFI: declare libpng's structs, set up its `longjmp` error handling, and do the same twice more for libjpeg and libtiff. ext-imgdec does that once, in C. A broken file, an unsupported layout and an image past the size limits each throw `ImgdecException` with their own code and the library's reason, the limits are checked from the header before any pixel memory exists, and nothing a library allocates outlives the call.
 
 ## Basic usage
 
