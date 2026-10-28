@@ -1,6 +1,5 @@
 /*
- * Classic TIFF through libtiff, by the same layout rules (and the same
- * refusal messages) as Surface's PHP reader: the first image; grey of either
+ * Classic TIFF through libtiff, by these layout rules: the first image; grey of either
  * polarity, RGB or palette; chunky or separate planes; orientation top-left;
  * fill order MSB first; unsigned samples; predictor 1, or 2 on 8 or 16 bits.
  * libtiff decompresses (any codec it has) and undoes the predictor, handing
@@ -100,7 +99,7 @@ typedef struct {
 	uint16_t *map[3];   /* palette colour map, libtiff's */
 } imgdec_tiff_layout;
 
-/* The refusals, in Surface's TiffReader order and words. */
+/* The refusals. */
 static imgdec_status imgdec_tiff_layout_of(TIFF *tif, imgdec_tiff_layout *layout, imgdec_error *error)
 {
 	uint16_t format = SAMPLEFORMAT_UINT, orientation = ORIENTATION_TOPLEFT, fill = FILLORDER_MSB2LSB, predictor = PREDICTOR_NONE;

@@ -30,8 +30,6 @@ Linux (`install-debian-trixie.sh`): checks the libraries, builds in place, insta
 
 Pi from the Mac: tree on the Mac is authoritative, Pi copy disposable. `COPYFILE_DISABLE=1 tar --no-mac-metadata --exclude .git -czf - -C <ext> . | fnk 'tar -xzf - -C ~/imgdec'`, install, Pest, `rm -rf ~/imgdec`.
 
-Surface's `tests/Images` drives the ext through its 'extended' driver against hand-written PNG and TIFF files and holds it to the PHP driver (`ParityTest`); the suite here is the ext on its own.
-
 [^mac]: Same script as ext-rasterize's, names changed, library check added.
 [^debian]: Same script as ext-rasterize's, names changed, library check added.
 [^m4]: config.m4

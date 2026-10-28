@@ -33,7 +33,7 @@ Constants: `IMGDEC_MAX_SIDE` 65535, `IMGDEC_MAX_PIXELS` 2²⁶, codes `IMGDEC_CO
 
 * Corrupt: the library's own message (`Not a PNG file`, `Not a JPEG file: starts with …`, libtiff's first error), `the data stops before the image does`.
 * Too large: before decoding, from the header.
-* TIFF unsupported, in these words (Surface's PHP reader uses the same): `sample format N`, `orientation N`, `planar configuration N`, `fill order N`, `photometric N`, `N-bit grey|RGB|palette`, `… with N samples per pixel`, `N-bit samples with extra samples`, `palette with extra samples`, `predictor N on M-bit samples`.[^tiff]
+* TIFF unsupported, in these words: `sample format N`, `orientation N`, `planar configuration N`, `fill order N`, `photometric N`, `N-bit grey|RGB|palette`, `… with N samples per pixel`, `N-bit samples with extra samples`, `palette with extra samples`, `predictor N on M-bit samples`.[^tiff]
 * Wrong argument type: `TypeError`.
 
 libtiff knows the Predictor tag only under a codec that uses it (LZW, Deflate); elsewhere none applies. libjpeg and libpng warnings never stop a decode; libtiff's are dropped. Each call collects its own TIFF errors (per-handle handler), so threads do not share messages.

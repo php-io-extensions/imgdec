@@ -166,7 +166,7 @@ $ php --ri imgdec
 imgdec
 
 imgdec support => enabled
-Version => 0.10.x
+Version => 0.11.x
 libpng => 1.6.59
 libjpeg API => 80
 libtiff => LIBTIFF, Version 4.7.2
