@@ -33,12 +33,14 @@ library versions it is linked against. Keep them patched; the installers link wh
 pkg-config finds.
 
 - **Size limits.** Width and height are read from the header and refused past
-  `IMGDEC_MAX_SIDE` (65535) or `IMGDEC_MAX_PIXELS` (2²⁶, a 256 MB RGBA8 result) before any
-  pixel buffer exists. The result is allocated through PHP's allocator, so `memory_limit`
-  still bounds a process decoding many images.
+  `IMGDEC_MAX_SIDE` (65535) or `IMGDEC_MAX_PIXELS` (2²⁶) before any pixel buffer exists.
+  `imgdec_decode_into()` also refuses, before writing a byte, when the caller's stride is
+  shorter than a row or when stride × height is past the capacity it was given.
 - **Memory.** Input is read from the PHP string in place; nothing reads past its end (each
-  library's reader is bounded by the string's length). When a library gives up mid-image, the
-  call frees what it allocated and throws `ImgdecException`; no partial image is returned.
+  library's reader is bounded by the string's length). A decode allocates its working buffer
+  with `emalloc` and frees it before returning. The pixels are copied into the address the
+  caller passed, which is not a PHP string. When a library gives up mid-image, the call frees
+  what it allocated and throws `ImgdecException` without writing that address.
 - **Errors.** libtiff errors are collected per call through a handle-scoped handler, so threads
   of a ZTS build do not see each other's messages. Library warnings never reach output.
 - **No I/O.** The functions take bytes; they open no files and make no network requests.

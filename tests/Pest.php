@@ -58,3 +58,46 @@ function tiff(int $width, int $height, int $photometric, int $bits, int $spp, st
 
     return "II*\0".pack('V', $ifd).$samples.(strlen($samples) % 2 ? "\0" : '').pack('v', count($tags)).$entries.pack('V', 0).$values;
 }
+
+/** Two 1×1 RGB pages. The second page is pixel 11 22 33. */
+function tiffPages(): string
+{
+    $pages = ["\xaa\xbb\xcc", "\x11\x22\x33"];
+    $at = 8;
+    $placed = [];
+    foreach ($pages as $samples) {
+        $placed[] = ['samples' => $samples, 'at' => $at];
+        $at += strlen($samples) + (strlen($samples) % 2);
+    }
+    $ifdAt = [];
+    foreach ($placed as $page) {
+        $ifdAt[] = $at;
+        $at += 2 + 12 * 9 + 4 + 6;
+    }
+    $out = "II*\0".pack('V', $ifdAt[0]);
+    foreach ($placed as $page) {
+        $out .= $page['samples'].(strlen($page['samples']) % 2 ? "\0" : '');
+    }
+    foreach ($placed as $i => $page) {
+        $next = $i + 1 < count($placed) ? $ifdAt[$i + 1] : 0;
+        $bits = $ifdAt[$i] + 2 + 12 * 9 + 4;
+        $tags = [
+            256 => [4, 1, pack('V', 1)],
+            257 => [4, 1, pack('V', 1)],
+            258 => [3, 3, pack('V', $bits)],
+            259 => [3, 1, pack('v', 1)."\0\0"],
+            262 => [3, 1, pack('v', 2)."\0\0"],
+            273 => [4, 1, pack('V', $page['at'])],
+            277 => [3, 1, pack('v', 3)."\0\0"],
+            278 => [4, 1, pack('V', 1)],
+            279 => [4, 1, pack('V', 3)],
+        ];
+        $entries = '';
+        foreach ($tags as $tag => [$type, $count, $value]) {
+            $entries .= pack('vvV', $tag, $type, $count).$value;
+        }
+        $out .= pack('v', 9).$entries.pack('V', $next).pack('v3', 8, 8, 8);
+    }
+
+    return $out;
+}

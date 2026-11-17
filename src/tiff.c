@@ -249,7 +249,7 @@ static void imgdec_tiff_row(const imgdec_tiff_layout *layout, unsigned char **pl
 	}
 }
 
-imgdec_status imgdec_tiff(const unsigned char *data, size_t length, imgdec_image *out, imgdec_error *error)
+imgdec_status imgdec_tiff(const unsigned char *data, size_t length, uint32_t frame, imgdec_image *out, imgdec_error *error)
 {
 	imgdec_tiff_source source = {data, (toff_t) length, 0};
 	imgdec_tiff_layout layout = {0};
@@ -263,6 +263,12 @@ imgdec_status imgdec_tiff(const unsigned char *data, size_t length, imgdec_image
 	TIFFOpenOptionsFree(options);
 	if (tif == NULL) {
 		return imgdec_fail(error, IMGDEC_CORRUPT, "%s", error->message[0] ? error->message : "libtiff could not open it.");
+	}
+
+	tdir_t directories = TIFFNumberOfDirectories(tif);
+	if (frame >= (uint32_t) directories || (frame != 0 && !TIFFSetDirectory(tif, (tdir_t) frame))) {
+		TIFFClose(tif);
+		return imgdec_fail(error, IMGDEC_CORRUPT, "TIFF image has no frame %u; it has %u.", frame, (unsigned) directories);
 	}
 
 	uint32_t width = 0, height = 0;
@@ -296,7 +302,7 @@ imgdec_status imgdec_tiff(const unsigned char *data, size_t length, imgdec_image
 	/* A band of block_height image rows per plane, assembled from strips or tiles, then converted row by row. */
 	unsigned char *band = emalloc((size_t) planes * block_height * image_row);
 	unsigned char *block = emalloc((size_t) block_size);
-	zend_string *pixels = zend_string_alloc((size_t) width * height * 4, 0);
+	unsigned char *pixels = emalloc((size_t) width * height * 4);
 	unsigned char **plane_rows = emalloc(sizeof(unsigned char *) * planes);
 	status = IMGDEC_OK;
 
@@ -323,7 +329,7 @@ imgdec_status imgdec_tiff(const unsigned char *data, size_t length, imgdec_image
 			for (uint16_t p = 0; p < planes; p++) {
 				plane_rows[p] = band + ((size_t) p * block_height + r) * image_row;
 			}
-			imgdec_tiff_row(&layout, plane_rows, width, (unsigned char *) ZSTR_VAL(pixels) + ((size_t) (top + r) * width * 4));
+			imgdec_tiff_row(&layout, plane_rows, width, pixels + ((size_t) (top + r) * width * 4));
 		}
 	}
 
@@ -332,10 +338,9 @@ imgdec_status imgdec_tiff(const unsigned char *data, size_t length, imgdec_image
 	efree(band);
 	TIFFClose(tif);
 	if (status != IMGDEC_OK) {
-		zend_string_release(pixels);
+		efree(pixels);
 		return status;
 	}
-	ZSTR_VAL(pixels)[ZSTR_LEN(pixels)] = '\0';
 
 	out->width = width;
 	out->height = height;

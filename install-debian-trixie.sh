@@ -155,11 +155,6 @@ if ! "$RESOLVED_PHPIZE" >>"$LOG_FILE" 2>&1; then
     show_failure_logs
     die "phpize failed. See ${LOG_FILE}."
 fi
-# No-op while the stub hash matches; regenerates arginfo after a stub edit.
-if ! "$PHP_BIN_REAL" build/gen_stub.php stubs >>"$LOG_FILE" 2>&1; then
-    show_failure_logs
-    die "gen_stub.php failed. See ${LOG_FILE}."
-fi
 if ! ./configure --enable-imgdec "--with-php-config=${RESOLVED_PHP_CONFIG}" >>"$LOG_FILE" 2>&1; then
     show_failure_logs
     die "configure failed. See ${LOG_FILE}."

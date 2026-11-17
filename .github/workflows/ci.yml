@@ -41,7 +41,7 @@ jobs:
       - name: Build
         run: |
           phpize
-          ./configure --enable-imgdec
+          ./configure --enable-imgdec --enable-imgdec-probes
           make -j"$(nproc 2>/dev/null || sysctl -n hw.ncpu)"
 
       - name: Load

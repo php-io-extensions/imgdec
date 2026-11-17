@@ -38,7 +38,7 @@ imgdec_status imgdec_jpeg(const unsigned char *data, size_t length, imgdec_image
 	struct jpeg_decompress_struct cinfo;
 	imgdec_jpeg_errors errors;
 	JSAMPLE *volatile row = NULL;
-	zend_string *volatile pixels = NULL;
+	unsigned char *volatile pixels = NULL;
 
 	cinfo.err = jpeg_std_error(&errors.manager);
 	errors.manager.error_exit = imgdec_jpeg_exit;
@@ -50,7 +50,7 @@ imgdec_status imgdec_jpeg(const unsigned char *data, size_t length, imgdec_image
 			efree(row);
 		}
 		if (pixels != NULL) {
-			zend_string_release(pixels);
+			efree(pixels);
 		}
 		jpeg_destroy_decompress(&cinfo);
 		return IMGDEC_CORRUPT;
@@ -74,10 +74,10 @@ imgdec_status imgdec_jpeg(const unsigned char *data, size_t length, imgdec_image
 	uint32_t height = cinfo.output_height;
 	int channels = cinfo.output_components;
 	bool inverted = cinfo.saw_Adobe_marker;
-	pixels = zend_string_alloc((size_t) width * height * 4, 0);
+	pixels = emalloc((size_t) width * height * 4);
 	row = emalloc((size_t) width * channels);
 
-	unsigned char *to = (unsigned char *) ZSTR_VAL(pixels);
+	unsigned char *to = pixels;
 	while (cinfo.output_scanline < height) {
 		JSAMPROW rows[1] = {row};
 		jpeg_read_scanlines(&cinfo, rows, 1);
@@ -105,7 +105,6 @@ imgdec_status imgdec_jpeg(const unsigned char *data, size_t length, imgdec_image
 	jpeg_finish_decompress(&cinfo);
 	jpeg_destroy_decompress(&cinfo);
 	efree(row);
-	ZSTR_VAL(pixels)[ZSTR_LEN(pixels)] = '\0';
 
 	out->width = width;
 	out->height = height;

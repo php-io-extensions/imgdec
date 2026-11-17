@@ -49,7 +49,7 @@ imgdec_status imgdec_png(const unsigned char *data, size_t length, imgdec_image 
 	png_structp png = png_create_read_struct(PNG_LIBPNG_VER_STRING, &source, imgdec_png_error, imgdec_png_warning);
 	png_infop info = png == NULL ? NULL : png_create_info_struct(png);
 	png_bytep *volatile rows = NULL;
-	zend_string *volatile pixels = NULL;
+	unsigned char *volatile pixels = NULL;
 	imgdec_status status = IMGDEC_OK;
 
 	if (info == NULL) {
@@ -62,7 +62,7 @@ imgdec_status imgdec_png(const unsigned char *data, size_t length, imgdec_image 
 			efree(rows);
 		}
 		if (pixels != NULL) {
-			zend_string_release(pixels);
+			efree(pixels);
 		}
 		png_destroy_read_struct(&png, &info, NULL);
 		return IMGDEC_CORRUPT;
@@ -94,16 +94,15 @@ imgdec_status imgdec_png(const unsigned char *data, size_t length, imgdec_image 
 		return imgdec_fail(error, IMGDEC_UNSUPPORTED, "colour type %d at %d bits did not come out as RGBA8", colour, png_get_bit_depth(png, info));
 	}
 
-	pixels = zend_string_alloc((size_t) width * height * 4, 0);
+	pixels = emalloc((size_t) width * height * 4);
 	rows = emalloc(sizeof(png_bytep) * height);
 	for (png_uint_32 y = 0; y < height; y++) {
-		rows[y] = (png_bytep) ZSTR_VAL(pixels) + (size_t) y * width * 4;
+		rows[y] = pixels + (size_t) y * width * 4;
 	}
 	png_read_image(png, rows);
 	png_read_end(png, NULL);
 
 	efree(rows);
-	ZSTR_VAL(pixels)[ZSTR_LEN(pixels)] = '\0';
 	png_destroy_read_struct(&png, &info, NULL);
 
 	out->width = width;

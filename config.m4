@@ -3,6 +3,12 @@ PHP_ARG_ENABLE([imgdec],
   [AS_HELP_STRING([--enable-imgdec], [Enable the imgdec image decoding extension (needs libpng, libjpeg and libtiff)])],
   [no])
 
+PHP_ARG_ENABLE([imgdec-probes],
+  [whether to build the test-only allocate, read and free helpers],
+  [AS_HELP_STRING([--enable-imgdec-probes], [Build imgdec_probe_alloc, imgdec_probe_read and imgdec_probe_free. Never for a release build])],
+  [no],
+  [no])
+
 if test "$PHP_IMGDEC" != "no"; then
   PKG_CHECK_MODULES([IMGDEC_PNG], [libpng >= 1.6])
   PKG_CHECK_MODULES([IMGDEC_JPEG], [libjpeg])
@@ -12,8 +18,12 @@ if test "$PHP_IMGDEC" != "no"; then
   PHP_EVAL_LIBLINE([$IMGDEC_PNG_LIBS $IMGDEC_JPEG_LIBS $IMGDEC_TIFF_LIBS], [IMGDEC_SHARED_LIBADD])
   PHP_SUBST([IMGDEC_SHARED_LIBADD])
 
+  if test "$PHP_IMGDEC_PROBES" != "no"; then
+    AC_DEFINE([IMGDEC_PROBES], [1], [Test-only allocate, read and free helpers])
+  fi
+
   PHP_NEW_EXTENSION([imgdec],
-    [src/imgdec.c src/png.c src/jpeg.c src/tiff.c],
+    [src/imgdec.c src/info.c src/png.c src/jpeg.c src/tiff.c],
     [$ext_shared],, [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1])
   PHP_ADD_BUILD_DIR([$ext_builddir/src])
 fi

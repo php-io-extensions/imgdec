@@ -37,37 +37,43 @@ const IMGDEC_UNSUPPORTED = UNKNOWN;
  */
 const IMGDEC_TOO_LARGE = UNKNOWN;
 
+/**
+ * Channel order for imgdec_decode_into(): red, green, blue, alpha.
+ * @var int
+ * @cvalue IMGDEC_RGBA
+ */
+const IMGDEC_RGBA = UNKNOWN;
+
+/**
+ * Channel order for imgdec_decode_into(): blue, green, red, alpha.
+ * @var int
+ * @cvalue IMGDEC_BGRA
+ */
+const IMGDEC_BGRA = UNKNOWN;
+
 /** Why an image was not decoded; the code is IMGDEC_CORRUPT, IMGDEC_UNSUPPORTED or IMGDEC_TOO_LARGE. */
 class ImgdecException extends Exception {}
 
 /**
- * PNG bytes into straight RGBA8 through libpng: palettes and grey expanded,
- * tRNS made alpha, 16-bit samples cut to their high byte, interlacing undone,
- * no gamma applied.
+ * The header, and nothing past it: format (png, jpeg or tiff), width, height,
+ * whether a pixel can be partly transparent, and how many frames the file holds.
  *
- * @return array{width: int, height: int, rgba8: string}
+ * @return array{format: string, width: int, height: int, alpha: bool, frames: int}
  * @throws ImgdecException
  */
-function imgdec_png(string $data): array {}
+function imgdec_info(string $bytes): array {}
 
 /**
- * JPEG bytes into RGBA8 through libjpeg's default decode: grey made RGB, CMYK
- * as gd converts it (inverted when an Adobe marker says so), alpha 255.
+ * One frame written at $address, straight alpha, rows top to bottom, $stride
+ * bytes from one row to the next. $order is IMGDEC_RGBA or IMGDEC_BGRA. Bytes
+ * outside the rows, and past the last row, are left as they were. The answer
+ * is the region written, [x, y, width, height], which is the whole frame at (0, 0).
  *
- * @return array{width: int, height: int, rgba8: string}
+ * Refuses, before writing one byte, when $address is 0, when $stride is shorter
+ * than a packed row, when $stride × height is past $capacity, and when $frame
+ * is not in the file.
+ *
+ * @return array{int, int, int, int}
  * @throws ImgdecException
  */
-function imgdec_jpeg(string $data): array {}
-
-/**
- * Classic TIFF bytes into straight RGBA8 through libtiff: the first image,
- * any compression libtiff reads, chunky or in separate planes, orientation
- * top-left; grey of either polarity at 1, 2, 4, 8 or 16 bits, RGB at 8 or 16,
- * a palette at 1, 2, 4 or 8 (colour map entries cut to their high byte);
- * unsigned samples; a first extra sample that is alpha kept (associated
- * alpha divided out: c = round(c × 255 ÷ a), capped at 255).
- *
- * @return array{width: int, height: int, rgba8: string}
- * @throws ImgdecException
- */
-function imgdec_tiff(string $data): array {}
+function imgdec_decode_into(string $bytes, int $address, int $capacity, int $stride, int $order, int $frame = 0): array {}

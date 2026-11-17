@@ -1,11 +1,11 @@
 ---
 type: Runbook
 title: Build, install, test
-description: The three libraries, scratch build with gen_stub, the two installers, Pest, the Pi loop.
+description: The three libraries, a scratch build, probes for tests only, the two installers, Pest, the Pi loop.
 resource: install-macos.sh
 tags: [build, linux, macos, pest]
 status: draft
-generated: { by: claude-opus/5.5, at: 2026-10-04T17:07:35Z }
+generated: { by: grok-4.7, at: 2026-11-17T13:40:00Z }
 sources:
   - id: mac
     resource: install-macos.sh
@@ -22,7 +22,7 @@ sources:
 
 Needs pkg-config, libpng ≥ 1.6, libjpeg, libtiff-4 ≥ 4.5 (`TIFFOpenOptions`). `config.m4` finds all three by pkg-config.[^m4] macOS: `brew install pkg-config libpng jpeg-turbo libtiff`. Debian / Pi OS: `apt install pkg-config libpng-dev libjpeg-dev libtiff-dev`.
 
-Dev loop: copy `config.m4 php_imgdec.h src stubs` to a scratch dir, `phpize`, `php build/gen_stub.php stubs`, `./configure --enable-imgdec --with-php-config=…`, `make CFLAGS="-Wall -Wextra -Wno-unused-parameter"`. Copy `stubs/imgdec_arginfo.h` back after a stub edit. Run Pest with `-d extension=<scratch>/modules/imgdec.so`. No warning from `src/` is acceptable.
+Dev loop: copy `config.m4 php_imgdec.h src stubs` to a scratch dir, `phpize`, `./configure --enable-imgdec --enable-imgdec-probes --with-php-config=…`, `make CFLAGS="-Wall -Wextra -Wno-unused-parameter"`. `stubs/imgdec_arginfo.h` is written by hand beside the stub; do not run gen_stub. `--enable-imgdec-probes` is how the tests allocate an address. A release install, including both installers and PIE, configures `--enable-imgdec` only. Run Pest with `-n -d extension=<scratch>/modules/imgdec.so`, because an installed imgdec stays loaded if php.ini is read. No warning from `src/` is acceptable.
 
 macOS (`install-macos.sh`): checks the libraries, builds in a temp copy for php@8.4 and php@8.4-zts, ad-hoc signs, writes `30-imgdec.ini`.[^mac]
 
